@@ -15,5 +15,9 @@
  */
 /**
  * Base package for languages.
+ * MyBatis 实现动态 SQL 语句的功能，提供了多种动态 SQL语句对应的节点。
+ * 例如<where> 节点、<if> 节点、<foreach> 节点等。
+ *
+ * 个人意向这些逻辑可以在repository中代码逻辑写好。没必要交给mybatis做。
  */
 package org.apache.ibatis.scripting;

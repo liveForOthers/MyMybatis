@@ -15,5 +15,12 @@
  */
 /**
  * Base package for handing plugins.
+ * 解决Mybatis不能完美切合所有的应用场景的问题
+ * 通过添加用户自定义插件的方式对 MyBatis 进行扩展。
+ * 用户自定义插件也可以改变 Mybatis 的默认行为，例如，我们可以拦截 SQL 语句并对其进行重写。
+ *
+ * 注意:
+ * 由于用户自定义插件会影响 MyBatis 的核心行为，
+ * 在使用自定义插件之前，开发人员需要了解 MyBatis 内部的原理，这样才能编写出安全、高效的插件。
  */
 package org.apache.ibatis.plugin;

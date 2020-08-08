@@ -15,5 +15,6 @@
  */
 /**
  * Base package for logging.
+ * 集成第三方日志框架。支持用户的各种日志框架都能输出正确的日志。
  */
 package org.apache.ibatis.logging;

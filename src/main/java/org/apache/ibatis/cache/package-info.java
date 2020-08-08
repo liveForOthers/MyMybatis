@@ -15,5 +15,7 @@
  */
 /**
  * Base package for caching stuff.
+ * 缓存模块
+ * 提供了一级缓存和二级缓存。 与主程序共享堆内存，仅数据量小使用，数据量大使用分布式缓存。
  */
 package org.apache.ibatis.cache;

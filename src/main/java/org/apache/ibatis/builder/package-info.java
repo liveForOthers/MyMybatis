@@ -18,5 +18,6 @@
  * build resultMap
  * build sqlSource
  * build mapper
+ * 配置解析过程
  */
 package org.apache.ibatis.builder;

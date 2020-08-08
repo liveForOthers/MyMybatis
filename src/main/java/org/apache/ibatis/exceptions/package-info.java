@@ -15,5 +15,6 @@
  */
 /**
  * Base package for exceptions.
+ * PersistenceException 和 TooManyResultsException 异常
  */
 package org.apache.ibatis.exceptions;

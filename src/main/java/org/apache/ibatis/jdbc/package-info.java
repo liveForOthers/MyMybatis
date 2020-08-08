@@ -15,5 +15,6 @@
  */
 /**
  * Utilities for JDBC.
+ * JDBC 单元测试工具类, 不感兴趣可以忽略。
  */
 package org.apache.ibatis.jdbc;

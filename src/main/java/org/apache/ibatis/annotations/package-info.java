@@ -15,5 +15,7 @@
  */
 /**
  * Contains all the annotation that are used in mapper interfaces.
+ * 使用注解在 Mapper 接口上编写简单的数据库 SQL 操作代码，
+ * 而无需像之前一样，必须编写 SQL 在 XML 格式的 Mapper 文件中。
  */
 package org.apache.ibatis.annotations;

@@ -17,5 +17,6 @@
  * Base package for mapping.
  * map the result from the database with the object
  * map the parameter with the xml query parameter
+ * SQL 操作解析后的映射。
  */
 package org.apache.ibatis.mapping;

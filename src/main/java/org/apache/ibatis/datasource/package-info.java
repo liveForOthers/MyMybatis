@@ -16,5 +16,7 @@
 /**
  * Base package for Datasources.
  * Control the connection of database
+ * 数据源模块
+ * 连接池功能、检测连接状态等
  */
 package org.apache.ibatis.datasource;
