@@ -46,19 +46,36 @@ public class PropertyParser {
   private static final String ENABLE_DEFAULT_VALUE = "false";
   private static final String DEFAULT_VALUE_SEPARATOR = ":";
 
+  // 构造方法，修饰符为 private ，禁止构造 PropertyParser 对象，因为它是一个静态方法的工具类。
   private PropertyParser() {
     // Prevent Instantiation
   }
 
+  /**
+   * 基于 variables 变量，替换 string 字符串中的动态属性，并返回结果
+   *
+   * @param string  目标字符串
+   * @param variables  替换key value集合对象
+   * @return 替换后的字符串
+   */
   public static String parse(String string, Properties variables) {
+    // 创建 VariableTokenHandler 对象
     VariableTokenHandler handler = new VariableTokenHandler(variables);
+    // 创建 GenericTokenParser 对象。
+    // openToken = ${ ，closeToken = } 也就是根据此标准解析替换 ${key}
     GenericTokenParser parser = new GenericTokenParser("${", "}", handler);
-    return parser.parse(string);
+    return parser.parse(string); // 执行解析替换
   }
 
   private static class VariableTokenHandler implements TokenHandler {
     private final Properties variables;
+    /**
+     * 是否开启默认值功能。默认为 {@link #ENABLE_DEFAULT_VALUE} 可配置properties 进行修改
+     */
     private final boolean enableDefaultValue;
+    /**
+     * 默认值的分隔符。默认为 {@link #DEFAULT_VALUE_SEPARATOR} ，即 ":" 。 可配置properties 进行修改
+     */
     private final String defaultValueSeparator;
 
     private VariableTokenHandler(Properties variables) {
@@ -76,20 +93,24 @@ public class PropertyParser {
       if (variables != null) {
         String key = content;
         if (enableDefaultValue) {
+          // 查找默认值
           final int separatorIndex = content.indexOf(defaultValueSeparator);
           String defaultValue = null;
           if (separatorIndex >= 0) {
             key = content.substring(0, separatorIndex);
             defaultValue = content.substring(separatorIndex + defaultValueSeparator.length());
           }
+          // 有默认值，优先替换，不存在则返回默认值
           if (defaultValue != null) {
             return variables.getProperty(key, defaultValue);
           }
         }
+        // 未开启默认值功能 或默认值不存在，直接替换
         if (variables.containsKey(key)) {
           return variables.getProperty(key);
         }
       }
+      // 未配置properties 不执行替换
       return "${" + content + "}";
     }
   }

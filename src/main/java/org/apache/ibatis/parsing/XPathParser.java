@@ -172,7 +172,7 @@ public class XPathParser {
 
   public String evalString(Object root, String expression) {
     String result = (String) evaluate(expression, root, XPathConstants.STRING);
-    result = PropertyParser.parse(result, variables);
+    result = PropertyParser.parse(result, variables); // 基于 variables 替换动态值，如果 result 为动态值
     return result;
   }
 
@@ -249,9 +249,19 @@ public class XPathParser {
     return new XNode(this, node, variables);
   }
 
+  /**
+   * 获得指定元素或节点的值
+   * 一系列的 #eval* 方法，用于获得 Boolean、Short、Integer、Long、Float、Double、String、Node 类型的元素或节点的“值”。
+   * 这一系列方法都是基本本方法
+   *
+   * @param expression 表达式
+   * @param root 指定节点
+   * @param returnType 返回类型
+   * @return 值
+   */
   private Object evaluate(String expression, Object root, QName returnType) {
     try {
-      return xpath.evaluate(expression, root, returnType);
+      return xpath.evaluate(expression, root, returnType); // 调用jdk xpath方法实现
     } catch (Exception e) {
       throw new BuilderException("Error evaluating XPath.  Cause: " + e, e);
     }
