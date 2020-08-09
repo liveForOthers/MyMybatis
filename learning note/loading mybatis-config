@@ -1,0 +1,8 @@
+Mybatis init mainly contains the following three steps:
+1 加载 mybatis-config.xml 配置文件。
+      builder 模块，为配置解析过程。
+      mapping 模块，主要为 SQL 操作解析后的映射。
+2 加载 Mapper 映射配置文件。
+3 加载 Mapper 接口中的注解信息。
+
+org.apache.ibatis.session.SqlSessionFactoryBuilder.build 获取工厂对象

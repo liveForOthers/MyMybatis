@@ -50,13 +50,15 @@ import org.apache.ibatis.type.JdbcType;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ * 负责解析 mybatis-config.xml 配置文件
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
-  private boolean parsed;
-  private final XPathParser parser;
-  private String environment;
-  private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
+  private boolean parsed; // 是否已解析
+  private final XPathParser parser; // Java XPath 解析器
+  private String environment; // 环境
+  private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory(); // ReflectorFactory 对象
 
   public XMLConfigBuilder(Reader reader) {
     this(reader, null, null);
@@ -83,8 +85,10 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
+    // <1> 创建 Configuration 对象
     super(new Configuration());
     ErrorContext.instance().resource("SQL Mapper Configuration");
+    // <2> 设置 Configuration 的 variables 属性
     this.configuration.setVariables(props);
     this.parsed = false;
     this.environment = environment;

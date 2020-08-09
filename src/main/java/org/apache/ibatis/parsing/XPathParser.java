@@ -43,14 +43,36 @@ import org.xml.sax.SAXParseException;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * 基于 Java XPath 解析器，用于解析 MyBatis mybatis-config.xml 和 **Mapper.xml 等 XML 配置文件。
  */
 public class XPathParser {
 
-  private final Document document;
-  private boolean validation;
-  private EntityResolver entityResolver;
-  private Properties variables;
-  private XPath xpath;
+  private final Document document; // XML Document对象, XML 被解析后，生成的 org.w3c.dom.Document 对象。
+  private boolean validation; // 是否校验, 是否校验 XML 。一般情况下，值为 true
+  // XML 实体解析器。默认情况下，对 XML 进行校验时，会基于 XML 文档开始位置指定的 DTD 文件或 XSD 文件。
+  // 使用本地 DTD 文件，从而避免下载网络 DTD 文件的效果
+  private EntityResolver entityResolver; //XML 实体解析器
+  /**
+   * 如
+   * <dataSource type="POOLED">
+   *   <property name="driver" value="${driver}"/>
+   *   <property name="url" value="${url}"/>
+   *   <property name="username" value="${username}"/>
+   *   <property name="password" value="${password}"/>
+   * </dataSource>
+   *
+   * variables 的来源，即可以在常用的 Java Properties 文件中配置，也可以使用 MyBatis <property /> 标签中配置。例如：
+   *
+   * <properties resource="org/mybatis/example/config.properties">
+   *   <property name="username" value="dev_user"/>
+   *   <property name="password" value="F2Fa3!33TYyg"/>
+   * </properties>
+   *
+   * 这里配置的 username 和 password 属性，就可以替换上面的 ${username} 和 ${password} 这两个动态属性。
+   * 在下面的 PropertyParser#parse(String string, Properties variables) 方法进行实现。
+   */
+  private Properties variables; // Properties 对象 用来替换需要动态配置的属性值
+  private XPath xpath; // Java XPath 对象 查询 XML 中的节点和元素
 
   public XPathParser(String xml) {
     commonConstructor(false, null, null);
@@ -112,8 +134,16 @@ public class XPathParser {
     this.document = document;
   }
 
+  /**
+   * 构造 XPathParser 对象
+   *
+   * @param xml XML 文件地址
+   * @param validation 是否校验 XML
+   * @param variables 变量 Properties 对象
+   * @param entityResolver XML 实体解析器
+   */
   public XPathParser(String xml, boolean validation, Properties variables, EntityResolver entityResolver) {
-    commonConstructor(validation, variables, entityResolver);
+    commonConstructor(validation, variables, entityResolver); // 在XPathParser中存储对象的引用
     this.document = createDocument(new InputSource(new StringReader(xml)));
   }
 
@@ -227,22 +257,29 @@ public class XPathParser {
     }
   }
 
+  /**
+   * 创建 Document 对象
+   *
+   * @param inputSource XML 的 InputSource 对象
+   * @return Document 对象
+   */
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
     try {
+      // 1> 创建 DocumentBuilderFactory 对象
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-      factory.setValidating(validation);
+      factory.setValidating(validation); // 设置是否验证 XML
 
       factory.setNamespaceAware(false);
       factory.setIgnoringComments(true);
       factory.setIgnoringElementContentWhitespace(false);
       factory.setCoalescing(false);
       factory.setExpandEntityReferences(true);
-
+      // 2> 创建 DocumentBuilder 对象
       DocumentBuilder builder = factory.newDocumentBuilder();
-      builder.setEntityResolver(entityResolver);
-      builder.setErrorHandler(new ErrorHandler() {
+      builder.setEntityResolver(entityResolver); // 设置实体解析器
+      builder.setErrorHandler(new ErrorHandler() { // 异常处理器  空实现
         @Override
         public void error(SAXParseException exception) throws SAXException {
           throw exception;
@@ -258,7 +295,7 @@ public class XPathParser {
           // NOP
         }
       });
-      return builder.parse(inputSource);
+      return builder.parse(inputSource); // 3> 解析 XML 文件
     } catch (Exception e) {
       throw new BuilderException("Error creating document instance.  Cause: " + e, e);
     }
@@ -268,6 +305,7 @@ public class XPathParser {
     this.validation = validation;
     this.entityResolver = entityResolver;
     this.variables = variables;
+    // 创建 XPathFactory 对象
     XPathFactory factory = XPathFactory.newInstance();
     this.xpath = factory.newXPath();
   }
