@@ -93,14 +93,14 @@ public class PropertyParser {
       if (variables != null) {
         String key = content;
         if (enableDefaultValue) {
-          // 查找默认值
+          // 查找默认值 默认值可在配置的key后加分隔符配置如 key:0 对应key如property中未配置 配置为默认值0
           final int separatorIndex = content.indexOf(defaultValueSeparator);
           String defaultValue = null;
-          if (separatorIndex >= 0) {
+          if (separatorIndex >= 0) { // 存在默认值的情况
             key = content.substring(0, separatorIndex);
             defaultValue = content.substring(separatorIndex + defaultValueSeparator.length());
           }
-          // 有默认值，优先替换，不存在则返回默认值
+          // 如key不在property中则 返回默认值
           if (defaultValue != null) {
             return variables.getProperty(key, defaultValue);
           }
