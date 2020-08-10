@@ -21,7 +21,7 @@ package org.apache.ibatis.parsing;
  * 抽象出 TokenHandler 支持多个处理器
  */
 public class GenericTokenParser {
-
+  // todo 思考 如何做到通用替换的  1 o,c token  2 handler抽象
   private final String openToken;
   private final String closeToken;
   private final TokenHandler handler;
