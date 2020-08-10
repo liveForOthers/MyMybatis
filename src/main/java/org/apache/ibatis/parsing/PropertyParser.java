@@ -20,6 +20,7 @@ import java.util.Properties;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * 职责 实现动态key替换
  */
 public class PropertyParser {
 
