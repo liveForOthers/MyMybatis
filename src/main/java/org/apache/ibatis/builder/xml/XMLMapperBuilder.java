@@ -52,13 +52,19 @@ import org.apache.ibatis.type.TypeHandler;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * 负责解析 Mapper 映射配置文件
  */
 public class XMLMapperBuilder extends BaseBuilder {
 
-  private final XPathParser parser;
-  private final MapperBuilderAssistant builderAssistant;
+  private final XPathParser parser; // Java XPath 解析器
+  private final MapperBuilderAssistant builderAssistant; // Mapper 构造器助手
+  /**
+   * 可被其他语句引用的可重用语句块的集合
+   *
+   * 例如：<sql id="userColumns"> ${alias}.id,${alias}.username,${alias}.password </sql>
+   */
   private final Map<String, XNode> sqlFragments;
-  private final String resource;
+  private final String resource; // 资源引用的地址
 
   @Deprecated
   public XMLMapperBuilder(Reader reader, Configuration configuration, String resource, Map<String, XNode> sqlFragments, String namespace) {
@@ -84,40 +90,56 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   private XMLMapperBuilder(XPathParser parser, Configuration configuration, String resource, Map<String, XNode> sqlFragments) {
     super(configuration);
-    this.builderAssistant = new MapperBuilderAssistant(configuration, resource);
+    /**
+     * MapperBuilderAssistant 对象，
+     * 是 XMLMapperBuilder 和 MapperAnnotationBuilder 的小助手，提供了一些公用的方法，
+     * 例如创建 ParameterMap、MappedStatement 对象等
+     */
+    this.builderAssistant = new MapperBuilderAssistant(configuration, resource); // 创建 MapperBuilderAssistant 对象
     this.parser = parser;
     this.sqlFragments = sqlFragments;
     this.resource = resource;
   }
 
+  /**
+   * 解析 Mapper XML 配置文件
+   */
   public void parse() {
+    // 如未加载过执行加载
     if (!configuration.isResourceLoaded(resource)) {
+      // 解析 <mapper /> 节点
       configurationElement(parser.evalNode("/mapper"));
-      configuration.addLoadedResource(resource);
-      bindMapperForNamespace();
+      configuration.addLoadedResource(resource); // 标记该 Mapper 已经加载过
+      bindMapperForNamespace(); // 绑定 Mapper
     }
 
-    parsePendingResultMaps();
-    parsePendingCacheRefs();
-    parsePendingStatements();
+    parsePendingResultMaps(); // 解析待定的 <resultMap /> 节点
+    parsePendingCacheRefs(); // 解析待定的 <cache-ref /> 节点
+    parsePendingStatements(); // 解析待定的 SQL 语句的节点
   }
 
   public XNode getSqlFragment(String refid) {
     return sqlFragments.get(refid);
   }
 
+  /**
+   * 解析 指定节点  如 <mapper />
+   * @param context
+   */
   private void configurationElement(XNode context) {
     try {
-      String namespace = context.getStringAttribute("namespace");
-      if (namespace == null || namespace.isEmpty()) {
+      String namespace = context.getStringAttribute("namespace"); // 获得 namespace 属性
+      if (namespace == null || namespace.isEmpty()) { // 每个mapper 必须有自己的namespace
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
-      builderAssistant.setCurrentNamespace(namespace);
-      cacheRefElement(context.evalNode("cache-ref"));
-      cacheElement(context.evalNode("cache"));
+      builderAssistant.setCurrentNamespace(namespace); // 设置 namespace 属性 记录在当前builderAssistant对象中
+      cacheRefElement(context.evalNode("cache-ref")); // 解析 <cache-ref /> 节点
+      cacheElement(context.evalNode("cache")); // 解析 <cache /> 节点
+      // 这是引用外部 parameterMap 的已经被废弃的方法。使用内联参数映射和 parameterType 属性 取代parameterMap TODO WHY？。
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
-      resultMapElements(context.evalNodes("/mapper/resultMap"));
-      sqlElement(context.evalNodes("/mapper/sql"));
+      resultMapElements(context.evalNodes("/mapper/resultMap")); // 解析 <resultMap /> 节点们
+      sqlElement(context.evalNodes("/mapper/sql")); // 解析 <sql /> 节点们
+      // 解析 <select /> <insert /> <update /> <delete /> 节点们
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);

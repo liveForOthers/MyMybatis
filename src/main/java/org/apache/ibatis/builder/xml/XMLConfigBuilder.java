@@ -107,32 +107,39 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
-      propertiesElement(root.evalNode("properties"));
-      Properties settings = settingsAsProperties(root.evalNode("settings"));
-      loadCustomVfs(settings);
+      propertiesElement(root.evalNode("properties")); // 解析 <properties /> 标签
+      Properties settings = settingsAsProperties(root.evalNode("settings")); // 解析 <settings /> 标签
+      loadCustomVfs(settings); // 加载自定义 VFS 实现类
       loadCustomLogImpl(settings);
-      typeAliasesElement(root.evalNode("typeAliases"));
-      pluginElement(root.evalNode("plugins"));
-      objectFactoryElement(root.evalNode("objectFactory"));
-      objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
-      reflectorFactoryElement(root.evalNode("reflectorFactory"));
-      settingsElement(settings);
+      typeAliasesElement(root.evalNode("typeAliases")); // 解析 <typeAliases /> 标签
+      pluginElement(root.evalNode("plugins")); // 解析 <plugins /> 标签
+      objectFactoryElement(root.evalNode("objectFactory")); // 解析 <objectFactory /> 标签
+      objectWrapperFactoryElement(root.evalNode("objectWrapperFactory")); // 解析 <objectWrapperFactory /> 标签
+      reflectorFactoryElement(root.evalNode("reflectorFactory")); // 解析 <reflectorFactory /> 标签
+      settingsElement(settings); // 赋值 <settings /> 到 Configuration 属性
       // read it after objectFactory and objectWrapperFactory issue #631
-      environmentsElement(root.evalNode("environments"));
-      databaseIdProviderElement(root.evalNode("databaseIdProvider"));
-      typeHandlerElement(root.evalNode("typeHandlers"));
-      mapperElement(root.evalNode("mappers"));
+      environmentsElement(root.evalNode("environments")); // 解析 <environments /> 标签
+      databaseIdProviderElement(root.evalNode("databaseIdProvider")); // 解析 <databaseIdProvider /> 标签
+      typeHandlerElement(root.evalNode("typeHandlers")); // 解析 <typeHandlers /> 标签
+      mapperElement(root.evalNode("mappers")); // 解析 <mappers /> 标签
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
     }
   }
 
+  /**
+   * 将 <setting /> 标签解析为 Properties 对象
+   *
+   * @param context
+   * @return
+   */
   private Properties settingsAsProperties(XNode context) {
     if (context == null) {
       return new Properties();
     }
     Properties props = context.getChildrenAsProperties();
     // Check that all settings are known to the configuration class
+    // 确保每个setting属性 在 Configuration 中，有相应的 setting 方法，否则抛出 BuilderException 异常
     MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
     for (Object key : props.keySet()) {
       if (!metaConfig.hasSetter(String.valueOf(key))) {
@@ -225,6 +232,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void propertiesElement(XNode context) throws Exception {
     if (context != null) {
+      // 读取子标签们，封装在 Properties 对象中
       Properties defaults = context.getChildrenAsProperties();
       String resource = context.getStringAttribute("resource");
       String url = context.getStringAttribute("url");
@@ -232,14 +240,18 @@ public class XMLConfigBuilder extends BaseBuilder {
         throw new BuilderException("The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
       }
       if (resource != null) {
+        // 读取本地 Properties 配置文件到 defaults 中。
         defaults.putAll(Resources.getResourceAsProperties(resource));
       } else if (url != null) {
+        // 读取远程 Properties 配置文件到 defaults 中。
         defaults.putAll(Resources.getUrlAsProperties(url));
       }
+      // 覆盖 configuration 中的 Properties 对象到 defaults 中。
       Properties vars = configuration.getVariables();
       if (vars != null) {
         defaults.putAll(vars);
       }
+      // 设置 defaults 到 parser 和 configuration 中。 也就是动态替换量
       parser.setVariables(defaults);
       configuration.setVariables(defaults);
     }
